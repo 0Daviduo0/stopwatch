@@ -1,0 +1,94 @@
+<template>
+  <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-white dark:bg-black transition-colors duration-300">
+    
+    <div class="w-full max-w-sm">
+      <div class="mb-12 text-center">
+        <h1 class="text-3xl font-serif font-heading tracking-heading text-black dark:text-white mb-2 transition-colors duration-300">Create Account.</h1>
+        <p class="text-gray-500 dark:text-gray-400 font-sans font-body text-sm transition-colors duration-300">Begin tracking your time.</p>
+      </div>
+
+      <form @submit.prevent="handleRegister" class="space-y-5">
+        <div class="space-y-1">
+          <label class="block text-xs font-heading uppercase tracking-wider text-gray-500 dark:text-gray-400 ml-4 mb-1 transition-colors duration-300">Email</label>
+          <input 
+            v-model="email" 
+            type="email" 
+            required
+            class="w-full px-6 py-3 bg-gray-50 dark:bg-gray-900 border border-transparent focus:bg-white dark:focus:bg-black focus:border-black dark:focus:border-white focus:outline-none transition-all duration-300 text-base font-body text-black dark:text-white placeholder-gray-400 dark:placeholder-gray-600 rounded-full"
+            placeholder="name@example.com"
+          />
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-heading uppercase tracking-wider text-gray-500 dark:text-gray-400 ml-4 mb-1 transition-colors duration-300">Password</label>
+          <input 
+            v-model="password" 
+            type="password" 
+            required
+            class="w-full px-6 py-3 bg-gray-50 dark:bg-gray-900 border border-transparent focus:bg-white dark:focus:bg-black focus:border-black dark:focus:border-white focus:outline-none transition-all duration-300 text-base font-body text-black dark:text-white placeholder-gray-400 dark:placeholder-gray-600 rounded-full"
+            placeholder="••••••••"
+          />
+          <p class="text-xs text-gray-400 dark:text-gray-500 font-body leading-none mt-1 ml-4 transition-colors duration-300">Minimum 6 characters.</p>
+        </div>
+
+        <div v-if="error" class="text-red-600 dark:text-red-400 text-xs font-medium mt-2 ml-4">
+          {{ error }}
+        </div>
+        <div v-if="message" class="text-black dark:text-white text-xs font-medium mt-2 ml-4">
+          {{ message }}
+        </div>
+
+        <div class="pt-6">
+          <button 
+            type="submit" 
+            :disabled="loading"
+            class="w-full py-4 bg-black dark:bg-white text-white dark:text-black text-sm font-heading tracking-wide uppercase hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center rounded-full"
+          >
+            <span v-if="loading">Creating...</span>
+            <span v-else>Register</span>
+          </button>
+        </div>
+
+        <p class="text-center text-xs text-gray-400 dark:text-gray-500 mt-6 font-body transition-colors duration-300">
+          ALREADY HAVE AN ACCOUNT? 
+          <router-link to="/login" class="text-black dark:text-white font-heading hover:underline ml-1 transition-colors duration-300">SIGN IN</router-link>
+        </p>
+      </form>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '../stores/user'
+
+const router = useRouter()
+const userStore = useUserStore()
+
+const email = ref('')
+const password = ref('')
+const loading = ref(false)
+const error = ref(null)
+const message = ref(null)
+
+const handleRegister = async () => {
+  try {
+    loading.value = true
+    error.value = null
+    message.value = null
+    const result = await userStore.signUp(email.value, password.value)
+    
+    // Check if email confirmation is required
+    if (result.user && result.session === null) {
+      message.value = 'Check your email for confirmation.'
+    } else {
+      router.push('/')
+    }
+  } catch (e) {
+    error.value = e.message
+  } finally {
+    loading.value = false
+  }
+}
+</script>
