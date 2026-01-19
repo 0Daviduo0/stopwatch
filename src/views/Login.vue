@@ -1,7 +1,9 @@
 <template>
-  <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-white dark:bg-black transition-colors duration-300">
+  <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-white dark:bg-black transition-colors duration-300 relative overflow-hidden">
     
-    <div class="w-full max-w-sm">
+    <BackgroundClock />
+
+    <div class="w-full max-w-sm relative z-10">
       <div class="mb-12 text-center">
         <h1 class="text-3xl font-serif font-heading tracking-heading text-black dark:text-white mb-2 transition-colors duration-300">Welcome Back.</h1>
         <p class="text-gray-500 dark:text-gray-400 font-sans font-body text-sm transition-colors duration-300">Sign in to your stopwatch account.</p>
@@ -14,7 +16,7 @@
             v-model="email" 
             type="email" 
             required
-            class="w-full px-6 py-3 bg-gray-50 dark:bg-gray-900 border border-transparent focus:bg-white dark:focus:bg-black focus:border-black dark:focus:border-white focus:outline-none transition-all duration-300 text-base font-body text-black dark:text-white placeholder-gray-400 dark:placeholder-gray-600 rounded-full"
+            class="w-full px-6 py-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-transparent focus:bg-white dark:focus:bg-black focus:border-black dark:focus:border-white focus:outline-none transition-all duration-300 text-base font-body text-black dark:text-white placeholder-gray-400 dark:placeholder-gray-600 rounded-full shadow-sm"
             placeholder="name@example.com"
           />
         </div>
@@ -25,7 +27,7 @@
             v-model="password" 
             type="password" 
             required
-            class="w-full px-6 py-3 bg-gray-50 dark:bg-gray-900 border border-transparent focus:bg-white dark:focus:bg-black focus:border-black dark:focus:border-white focus:outline-none transition-all duration-300 text-base font-body text-black dark:text-white placeholder-gray-400 dark:placeholder-gray-600 rounded-full"
+            class="w-full px-6 py-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-transparent focus:bg-white dark:focus:bg-black focus:border-black dark:focus:border-white focus:outline-none transition-all duration-300 text-base font-body text-black dark:text-white placeholder-gray-400 dark:placeholder-gray-600 rounded-full shadow-sm"
             placeholder="••••••••"
           />
         </div>
@@ -58,6 +60,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
+import BackgroundClock from '../components/BackgroundClock.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
