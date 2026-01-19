@@ -4,6 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
@@ -36,8 +37,8 @@ export default {
       },
       colors: {
         // Monochromatic Palette
-        black: '#09090b', // Zinc 950
-        white: '#ffffff',
+        black: '#121212', // Material Design Dark
+        white: '#faf9f6', // Off White
         gray: {
           50: '#fafafa',  // Zinc 50
           100: '#f4f4f5', // Zinc 100
