@@ -158,7 +158,7 @@
                  <!-- Delete Action -->
                  <button 
                   @click="initiateDelete(moment.id)"
-                  class="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 transition-all duration-200 order-2 ml-auto"
+                  class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 transition-all duration-200 order-2 ml-auto"
                   title="Delete moment"
                  >
                    <PhTrash :size="20" weight="regular" />
@@ -238,7 +238,7 @@
                  </div>
                  <button 
                   @click="initiateDelete(moment.id)"
-                  class="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 transition-all duration-200 order-2 ml-auto"
+                  class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 transition-all duration-200 order-2 ml-auto"
                  >
                    <PhTrash :size="18" weight="regular" />
                  </button>
@@ -327,8 +327,11 @@ const isPressed = ref(false)
 
 const startButtonCycle = () => {
     buttonCycleInterval = setInterval(() => {
+        const isTouch = window.matchMedia('(hover: none)').matches
         if (buttonState.value === 'icon') buttonState.value = 'text'
-        else if (buttonState.value === 'text') buttonState.value = 'space'
+        else if (buttonState.value === 'text') {
+            buttonState.value = isTouch ? 'icon' : 'space'
+        }
         else buttonState.value = 'icon'
     }, 4000)
 }
