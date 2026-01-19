@@ -2,10 +2,10 @@
   <div class="min-h-screen flex flex-col items-center relative bg-white dark:bg-black transition-colors duration-300">
     
     <!-- Logout / Navigation -->
-    <div class="absolute top-6 right-6 z-10">
+    <div class="absolute top-6 right-6 z-50">
       <button 
         @click="handleLogout"
-        class="text-sm font-heading uppercase tracking-widest text-gray-400 hover:text-black dark:text-gray-600 dark:hover:text-white transition-colors"
+        class="text-sm font-heading uppercase tracking-widest text-gray-400 hover:text-black dark:text-gray-600 dark:hover:text-white transition-colors cursor-pointer"
       >
         Sign Out
       </button>
@@ -483,7 +483,13 @@ onUnmounted(() => {
 })
 
 const handleLogout = async () => {
-  await userStore.signOut()
-  router.push('/login')
+  console.log('Logout clicked')
+  try {
+    await userStore.signOut()
+  } catch (e) {
+    console.error('Sign out error:', e)
+  } finally {
+    router.push('/login')
+  }
 }
 </script>

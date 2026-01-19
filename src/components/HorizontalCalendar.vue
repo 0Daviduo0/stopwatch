@@ -22,6 +22,7 @@
         <!-- Day Card -->
         <button 
           v-else
+          :id="'day-' + item.id"
           :ref="el => setDayRef(el, item)"
           @click="selectDate(item)"
           :disabled="item.isFuture"
@@ -115,12 +116,6 @@ const generateBatch = (fromDate, daysCount = 30) => {
     newItems.unshift(dayItem)
     
     // Check if we need a month marker BEFORE this day (which is visually to the left)
-    // Actually, markers should appear when the month CHANGES.
-    // Since we are creating a list [Oldest ... Newest]
-    // Labels should be inserted when the month changes from one item to the next.
-    // But since we are generating backwards, we check the previous iteration logic?
-    // Let's do a post-process insert or insert while generating?
-    
     // While generating backwards: 
     // If current day is the 1st of the month, prepend a Month Marker for THIS month.
     if (current.getDate() === 1) {
@@ -167,7 +162,10 @@ const selectDate = (item) => {
   emit('update:modelValue', item.date)
 }
 
-watch(() => props.modelValue, updateSelection)
+watch(() => props.modelValue, () => {
+    updateSelection()
+    centerSelected(true) // Animate on strict selection change
+})
 
 // Refs for scrolling
 const setDayRef = (el, item) => {
@@ -204,9 +202,19 @@ const prependDays = () => {
 }
 
 // Centering Logic
-const centerSelected = () => {
+const centerSelected = (smooth = true) => {
   nextTick(() => {
-    const el = dayRefs.value['selected']
+    let el = dayRefs.value['selected']
+    // Fallback: try to find by ID if ref isn't set (e.g. init load)
+    if (items.value.length > 0) {
+         // Find selected item
+         const selectedItem = items.value.find(i => i.isSelected)
+         if (selectedItem) {
+             const domEl = document.getElementById('day-' + selectedItem.id)
+             if (domEl) el = domEl
+         }
+    }
+
     if (el && scrollContainer.value) {
       const containerWidth = scrollContainer.value.clientWidth
       const elWidth = el.clientWidth
@@ -214,21 +222,17 @@ const centerSelected = () => {
       
       scrollContainer.value.scrollTo({
         left: elLeft - (containerWidth / 2) + (elWidth / 2),
-        behavior: 'smooth'
+        behavior: smooth ? 'smooth' : 'auto'
       })
-    } else {
-        // Fallback if no selected ref (e.g. initial load might be weird timing)
-        // Try scrolling to end if today is selected
-       // scrollContainer.value.scrollLeft = scrollContainer.value.scrollWidth
-    }
+    } 
   })
 }
 
 onMounted(() => {
   initCalendar()
-  // Wait for initial render then center
+  // Force instant centering on mount
   setTimeout(() => {
-     centerSelected()
+     centerSelected(false)
   }, 100)
 })
 
