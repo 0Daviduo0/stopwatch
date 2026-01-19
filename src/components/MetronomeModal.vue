@@ -168,8 +168,6 @@ const start = () => {
         const ms = startMs.value ? parseInt(startMs.value) : 0
         
         startAt.setHours(hours, minutes, seconds || 0, ms)
-        
-        // Handle past times naturally (store will catch up or start immed depending on diff logic)
     }
 
     store.start(intervalMs, startAt)

@@ -33,7 +33,6 @@
                     class="group relative w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 border-gray-300 dark:border-zinc-700 ml-4 overflow-hidden focus:outline-none hover:border-black dark:hover:border-white transition-all duration-300"
                     :class="{ 'hover:border-red-500 dark:hover:border-red-500 hover:bg-red-500': metronomeStore.isPlaying }"
                 >
-                    <!-- Pulse Animation (Visible when playing, hidden on hover) -->
                     <div 
                         v-show="!metronomeStore.isPlaying || (metronomeStore.isPlaying)"
                         class="absolute inset-0 rounded-full transition-opacity duration-200"
@@ -44,7 +43,6 @@
                         :style="metronomeStyle"
                     ></div>
 
-                    <!-- Stop Icon (Visible on hover when playing) -->
                     <div 
                         v-if="metronomeStore.isPlaying"
                         class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
@@ -79,7 +77,6 @@
                     : ''
               ]"
             >
-               <!-- Background pulse (Only for Icon/Text) -->
                <div v-if="buttonState !== 'space'" class="absolute inset-0 rounded-inherit border-2 border-transparent group-hover:border-black dark:group-hover:border-white opacity-20 group-hover:scale-110 transition-all duration-500 rounded-[inherit]"></div>
                
                <!-- Content Transitions -->
@@ -483,11 +480,10 @@ onUnmounted(() => {
 })
 
 const handleLogout = async () => {
-  console.log('Logout clicked')
   try {
     await userStore.signOut()
   } catch (e) {
-    console.error('Sign out error:', e)
+    console.error(e)
   } finally {
     router.push('/login')
   }

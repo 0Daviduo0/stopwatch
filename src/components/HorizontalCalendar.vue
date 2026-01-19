@@ -115,8 +115,6 @@ const generateBatch = (fromDate, daysCount = 30) => {
     const dayItem = createDayItem(current)
     newItems.unshift(dayItem)
     
-    // Check if we need a month marker BEFORE this day (which is visually to the left)
-    // While generating backwards: 
     // If current day is the 1st of the month, prepend a Month Marker for THIS month.
     if (current.getDate() === 1) {
        newItems.unshift(createMonthItem(current))

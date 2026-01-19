@@ -7,7 +7,7 @@ export const vaporize = (element) => {
 
         const rect = element.getBoundingClientRect()
         const particles = []
-        const particleCount = 200 // Increased count for denser effect
+        const particleCount = 200
 
         // Create a fixed container for particles on top of everything
         const container = document.createElement('div')
@@ -17,10 +17,9 @@ export const vaporize = (element) => {
         container.style.width = '100vw'
         container.style.height = '100vh'
         container.style.pointerEvents = 'none'
-        container.style.zIndex = '2147483647' // Max z-index
+        container.style.zIndex = '2147483647'
         document.body.appendChild(container)
 
-        // Force colors to be visible
         const isDark = document.documentElement.classList.contains('dark') || document.body.classList.contains('dark')
         const white = '255, 255, 255'
         const black = '0, 0, 0'
@@ -31,12 +30,10 @@ export const vaporize = (element) => {
         for (let i = 0; i < particleCount; i++) {
             const p = document.createElement('div')
 
-            // Random position within the element rect
             const relativeX = Math.random() * rect.width
             const x = rect.left + relativeX
             const y = rect.top + Math.random() * rect.height
 
-            // Vary size more significantly (2px to 6px)
             const size = Math.random() * 4 + 2
 
             p.style.position = 'absolute'
@@ -48,33 +45,23 @@ export const vaporize = (element) => {
             // 70% chance of being red (the "delete" color), 30% theme color
             const color = Math.random() > 0.3 ? red : themeColor
             p.style.backgroundColor = `rgb(${color})`
-
-            // Make them round
             p.style.borderRadius = '50%'
             p.style.opacity = '1'
-            p.style.boxShadow = `0 0 2px rgba(${color}, 0.5)` // Add glow
+            p.style.boxShadow = `0 0 2px rgba(${color}, 0.5)`
 
             container.appendChild(p)
             particles.push(p)
 
             // Animation Settings
-            // Slower: 800ms - 1500ms
             const duration = Math.random() * 700 + 800
-
-            // Direction: Right to Left (Force coming from Right)
-            // X: -100px to -300px (Strong left movement)
+            // Direction: Right to Left
             const destX = -(Math.random() * 200 + 100)
-
-            // Y: -50px to +50px (Slight varying vertical spread)
             const destY = (Math.random() - 0.5) * 100
-
             const rotation = Math.random() * 720 - 360
 
-            // Propagation Delay: Right side starts first (0ms), Left side starts later (up to 300ms)
-            // relativeX is 0 at left, rect.width at right.
+            // Propagation Delay: Right side starts first
             const waveDelay = (1 - (relativeX / rect.width)) * 300
 
-            // Native Animation
             p.animate([
                 {
                     transform: `translate(0, 0) scale(1) rotate(0deg)`,
@@ -87,17 +74,15 @@ export const vaporize = (element) => {
             ], {
                 duration: duration,
                 delay: waveDelay,
-                easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)', // Ease out
+                easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
                 fill: 'forwards'
             })
         }
 
-        // Return promise after the "wave" has mostly passed so the element can be removed
         setTimeout(() => {
             resolve()
         }, 600)
 
-        // Cleanup DOM after all animations effectively finished
         setTimeout(() => {
             if (document.body.contains(container)) {
                 document.body.removeChild(container)

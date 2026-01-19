@@ -14,10 +14,6 @@ export const useMomentsStore = defineStore('moments', {
 
             this.loading = true
 
-            // Calculate start and end of the day in local time or UTC? 
-            // Storing as timestamptz is best. 
-            // For simplicity, we filter by a range.
-
             const startOfDay = new Date(date)
             startOfDay.setHours(0, 0, 0, 0)
 
