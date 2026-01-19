@@ -24,8 +24,34 @@
           <!-- Clock -->
           <div class="text-center select-none w-full mb-12">
             <div class="font-sans font-light text-black dark:text-white transition-colors duration-300 leading-none">
-              <span class="text-[12vw] sm:text-[15vw] font-bold tabular-nums tracking-tighter block md:inline">
+              <span class="text-[12vw] sm:text-[15vw] font-bold tabular-nums tracking-tighter block md:inline flex items-baseline justify-center gap-2">
                 {{ formattedTime.main }}<span class="text-[4vw] sm:text-[5vw] text-gray-400 dark:text-gray-600 align-top ml-1">{{ formattedTime.ms }}</span>
+                
+                <!-- Metronome Indicator -->
+                <button 
+                    @click="handleMetronomeClick"
+                    class="group relative w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 border-gray-300 dark:border-zinc-700 ml-4 overflow-hidden focus:outline-none hover:border-black dark:hover:border-white transition-all duration-300"
+                    :class="{ 'hover:border-red-500 dark:hover:border-red-500 hover:bg-red-500': metronomeStore.isPlaying }"
+                >
+                    <!-- Pulse Animation (Visible when playing, hidden on hover) -->
+                    <div 
+                        v-show="!metronomeStore.isPlaying || (metronomeStore.isPlaying)"
+                        class="absolute inset-0 rounded-full transition-opacity duration-200"
+                        :class="[
+                            { 'animate-pulse-fill': metronomeStore.isPlaying },
+                            { 'group-hover:opacity-0': metronomeStore.isPlaying }
+                        ]"
+                        :style="metronomeStyle"
+                    ></div>
+
+                    <!-- Stop Icon (Visible on hover when playing) -->
+                    <div 
+                        v-if="metronomeStore.isPlaying"
+                        class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    >
+                        <PhStop weight="fill" class="text-white w-3 h-3 sm:w-4 sm:h-4" />
+                    </div>
+                </button>
               </span>
             </div>
           </div>
@@ -94,8 +120,9 @@
              <div 
               v-for="moment in momentsStore.moments" 
               :key="moment.id"
+              :id="'moment-' + moment.id"
               :ref="el => setMomentRef(el, moment.id)"
-              class="flex items-center gap-4 p-4 rounded-3xl border border-transparent transition-all duration-300 group overflow-hidden relative"
+              class="flex flex-wrap items-center gap-4 p-4 rounded-3xl border border-transparent transition-all duration-300 group overflow-hidden relative"
               :class="[
                 deletingMomentId === moment.id 
                   ? 'bg-red-500 text-white' 
@@ -106,26 +133,35 @@
                <!-- Normal State -->
                <template v-if="deletingMomentId !== moment.id">
                  <!-- Time -->
-                 <div class="font-sans font-bold text-xl tabular-nums text-black dark:text-white shrink-0 pt-0.5">
+                 <div class="font-sans font-bold text-xl tabular-nums text-black dark:text-white shrink-0 pt-0.5 order-1">
                     {{ formatMomentTime(moment.recorded_at) }}
                  </div>
                  
                  <!-- Note Input -->
-                 <div class="flex-1">
-                   <input 
+                 <div 
+                    class="transition-all duration-300"
+                    :class="[
+                        isLong(moment.note) 
+                            ? 'w-full order-3 mt-2' 
+                            : 'flex-1 order-2'
+                    ]"
+                 >
+                   <textarea 
                       v-model="moment.note"
                       @blur="updateNote(moment)"
-                      @keydown.enter="$event.target.blur()"
-                      type="text" 
+                      @input="autoResize($event.target)"
+                      @focus="autoResize($event.target)"
+                      @keydown.enter.prevent="$event.target.blur()"
                       placeholder="Add a note..." 
-                      class="w-full bg-transparent border-none p-0 text-sm text-gray-600 dark:text-gray-300 placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-0"
-                   />
+                      rows="1"
+                      class="w-full bg-transparent border-none p-0 text-sm text-gray-600 dark:text-gray-300 placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-0 resize-none overflow-hidden"
+                   ></textarea>
                  </div>
 
                  <!-- Delete Action -->
                  <button 
                   @click="initiateDelete(moment.id)"
-                  class="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 transition-all duration-200"
+                  class="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 transition-all duration-200 order-2 ml-auto"
                   title="Delete moment"
                  >
                    <PhTrash :size="20" weight="regular" />
@@ -170,7 +206,9 @@
              <div 
               v-for="moment in momentsStore.moments" 
               :key="moment.id"
-              class="flex items-center gap-4 p-4 rounded-3xl border border-transparent transition-all duration-300 group overflow-hidden relative"
+              :id="'moment-' + moment.id"
+              :ref="el => setMomentRef(el, moment.id)"
+              class="flex flex-wrap items-center gap-4 p-4 rounded-3xl border border-transparent transition-all duration-300 group overflow-hidden relative"
               :class="[
                 deletingMomentId === moment.id 
                   ? 'bg-red-500 text-white' 
@@ -179,22 +217,31 @@
              >
                <!-- Normal State -->
                <template v-if="deletingMomentId !== moment.id">
-                 <div class="font-sans font-bold text-lg tabular-nums text-black dark:text-white shrink-0 pt-0.5">
+                 <div class="font-sans font-bold text-lg tabular-nums text-black dark:text-white shrink-0 pt-0.5 order-1">
                     {{ formatMomentTime(moment.recorded_at) }}
                  </div>
-                 <div class="flex-1">
-                   <input 
+                 <div 
+                    class="transition-all duration-300"
+                    :class="[
+                        isLong(moment.note) 
+                            ? 'w-full order-3 mt-2' 
+                            : 'flex-1 order-2'
+                    ]"
+                 >
+                   <textarea 
                       v-model="moment.note"
                       @blur="updateNote(moment)"
-                      @keydown.enter="$event.target.blur()"
-                      type="text" 
+                      @input="autoResize($event.target)"
+                      @focus="autoResize($event.target)"
+                      @keydown.enter.prevent="$event.target.blur()"
                       placeholder="Add a note..." 
-                      class="w-full bg-transparent border-none p-0 text-sm text-gray-600 dark:text-gray-300 placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-0"
-                   />
+                      rows="1"
+                      class="w-full bg-transparent border-none p-0 text-sm text-gray-600 dark:text-gray-300 placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-0 resize-none overflow-hidden"
+                   ></textarea>
                  </div>
                  <button 
                   @click="initiateDelete(moment.id)"
-                  class="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 transition-all duration-200"
+                  class="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 transition-all duration-200 order-2 ml-auto"
                  >
                    <PhTrash :size="18" weight="regular" />
                  </button>
@@ -226,6 +273,11 @@
       </transition>
     </div>
 
+    <MetronomeModal 
+        :is-open="isMetronomeModalOpen"
+        @close="isMetronomeModalOpen = false"
+    />
+
   </div>
 </template>
 
@@ -234,12 +286,33 @@ import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { useMomentsStore } from '../stores/moments'
+import { useMetronomeStore } from '../stores/metronome'
 import HorizontalCalendar from '../components/HorizontalCalendar.vue'
-import { PhPlus, PhTrash } from '@phosphor-icons/vue'
+import MetronomeModal from '../components/MetronomeModal.vue'
+import { PhPlus, PhTrash, PhStop } from '@phosphor-icons/vue'
+import { vaporize } from '../utils/vaporize'
 
 const router = useRouter()
 const userStore = useUserStore()
 const momentsStore = useMomentsStore()
+const metronomeStore = useMetronomeStore()
+
+const isMetronomeModalOpen = ref(false)
+const openMetronomeSettings = () => isMetronomeModalOpen.value = true
+
+const handleMetronomeClick = () => {
+    if (metronomeStore.isPlaying) {
+        metronomeStore.stop()
+    } else {
+        openMetronomeSettings()
+    }
+}
+
+const metronomeStyle = computed(() => {
+    return {
+        animationDuration: `${metronomeStore.intervalMs}ms`
+    }
+})
 const now = ref(new Date())
 const selectedDate = ref(new Date())
 const isIntroDone = ref(false)
@@ -264,7 +337,7 @@ const startButtonCycle = () => {
 }
 
 const handleKeydown = (e) => {
-    if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+    if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
         e.preventDefault()
         isPressed.value = true
         recordMoment()
@@ -293,6 +366,13 @@ const isTodaySelected = computed(() => {
 const formatDateText = (date) => {
   return new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(date)
 }
+
+const autoResize = (target) => {
+    target.style.height = 'auto'
+    target.style.height = target.scrollHeight + 'px'
+}
+
+const isLong = (text) => text && text.length > 35
 
 const formatMomentTime = (isoString) => {
   const date = new Date(isoString)
@@ -369,7 +449,12 @@ const cancelDelete = () => {
 const confirmDelete = async () => {
   const id = deletingMomentId.value
   if (id) {
-    const el = momentRefs.value[id]
+    // Try via ref, fallback to DOM ID
+    let el = momentRefs.value[id]
+    if (!el) {
+        el = document.getElementById('moment-' + id)
+    }
+
     if (el) {
        // Apply fade out to the element while particles fly
        el.style.transition = 'opacity 0.2s ease-out'
